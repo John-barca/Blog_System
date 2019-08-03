@@ -80,30 +80,32 @@ namespace blog_system{
             return true;
         }
 
-        bool Update(const Json::Value& blog){
-            const std::string& content = blog["content"].asString();
+        bool Update(const Json::Value &blog)
+        {
+            const std::string &content = blog["content"].asString();
             //文档要求sz*2 + 1
             //char* to = new char[content.size() * 2 + 1];
             std::unique_ptr<char> to(new char[content.size() * 2 + 1]);
             mysql_real_escape_string(mysql_, to.get(), content.c_str(), content.size());
             //核心就是拼装sql语句
             //char sql[1024 * 100] = {0};
+
             std::unique_ptr<char> sql(new char[content.size() * 2 + 4096]);
- 
-            sprintf(sql.get(), "update blog_table set title='%s', content='%s', tag_id=%d, blog_id=%d where blog_id=%d"
-                ,blog["title"].asCString()
-                ,to.get()
-                ,blog["tag_id"].asInt()
-                ,blog["blog_id"].asInt());
+            sprintf(sql.get(), "update blog_table set title='%s', content='%s',tag_id=%d where blog_id=%d",
+                    blog["title"].asCString(),
+                    to.get(),
+                    blog["tag_id"].asInt(),
+                    blog["blog_id"].asInt());
             int ret = mysql_query(mysql_, sql.get());
-            if(ret != 0){
+            if (ret != 0)
+            {
                 printf("更新博客失败: %s !\n", mysql_error(mysql_));
                 return false;
             }
             printf("更新博客成功 !\n");
-            return true;            
+            return true;
         }
-
+        
         //blogs作为一个输出型参数
         bool SelectAll(Json::Value* blogs, const std::string& tag_id = ""){
             //查找不需要太长的sql，固定长度就够了
@@ -182,14 +184,14 @@ namespace blog_system{
         }
 
         bool Insert(const Json::Value& tag){
-            char sql[1024 * 4] = {0};
-            sprintf(sql, "insert into tag_table values(null, %s)", tag["tag_name"].asCString());
+            char sql[1024 * 4];
+            sprintf(sql, "insert into tag_table values(null, '%s')", tag["tag_name"].asCString());
             int ret = mysql_query(mysql_, sql);
             if(ret != 0){
                 printf("插入标签失败! %s\n", mysql_error(mysql_));
                 return false;
             }
-            printf("删除标签成功!\n");
+            printf("插入标签成功!\n");
             return true;
         }
 
@@ -230,4 +232,15 @@ namespace blog_system{
     private:
         MYSQL* mysql_;
     };
+
+    #if 0
+    // 用户表
+    class Author{
+    public:
+
+
+    private:
+        MYSQL* mysql_;
+    };
+    #endif
 } //end namespace
