@@ -38,7 +38,8 @@
 <!-- content srart -->
 <div class="am-g am-g-fixed blog-fixed" id="app">
     <div class="am-u-md-8 am-u-sm-12" v-show="blog.blog_id == null">
-
+        <h1 style="text-align:center">韩浩东的博客</h1>
+        <button type="button" class="am-btn am-btn-warning am-round" v-on:click="insert_blog(blog)">插入博客</button>
         <article class="am-g blog-entry-article" v-for="blog in blogs" v-cloak>
             <div class="am-u-lg-6 am-u-md-12 am-u-sm-12 blog-entry-text">
                 <span><a href="" class="blog-color">{{tag_id2name(blog.tag_id)}} &nbsp;</a></span>
@@ -46,7 +47,8 @@
                 <span>{{blog.create_time}}</span>
                 <!--v-on:click 把当前的 html 标签关联上一个鼠标点击事件-->
                 <h1><a v-on:click="edit_blog(blog.blog_id)">{{blog.title}}</a></h1>
-                <button type="button" class="am-btn am-btn-warning am-round" v-on:click="Delete_blog(blog.blog_id)">删除博客</button>
+                <button type="button" class="am-btn am-btn-warning am-round"
+                    v-on:click="Delete_blog(blog.blog_id)">删除博客</button>
                 <p><a href="" class="blog-continue">continue reading</a></p>
             </div>
         </article>
@@ -70,7 +72,7 @@
     <div class="am-u-md-4 am-u-sm-12 blog-sidebar" v-show="blog.blog_id == null">
         <div class="blog-sidebar-widget blog-bor" v-cloak>
             <h2 class="blog-text-center blog-title"><span>About ME</span></h2>
-            <img src="assets/i/f14.jpg" alt="about me" class="blog-entry-img">
+            <img src="images/04.jpg" alt="about me" class="blog-entry-img">
             <p>{{author}}</p>
             <!--插值表达式-->
             <p>
@@ -291,9 +293,11 @@
                     }
                 })
             },
+            // 返回主页
             back(){
                 this.blog = {};
             },
+            // 更新博客内容
             update_blog(blog_id){
                 // 从编辑器中获取到修改后的 markdown 数据
                 var content = testEditor.getMarkdown();
@@ -311,6 +315,45 @@
                     success:function(data, status){
                         this.get_blogs();
                         alert("提交成功!");
+                        this.back();
+                    }
+                })
+            },
+            t_time(){
+                function getNowFormatDate() {
+                    var date = new Date();
+                    var seperator1 = "/";
+                    var year = date.getFullYear();
+                    var month = date.getMonth() + 1;
+                    var strDate = date.getDate();
+                    if (month >= 1 && month <= 9) {
+                        month = "0" + month;
+                    }
+                    if (strDate >= 0 && strDate <= 9) {
+                        strDate = "0" + strDate;
+                    }
+                    var currentdate = year + seperator1 + month + seperator1 + strDate;
+                    return currentdate;
+                }
+            },
+            insert_blog(){
+                // 新增博客
+                // 以 markdown 的格式进行编辑
+                // 协议请求部分
+                var content = testEditor.getMarkdown();
+                var body = {
+                    title: this.blog.title,
+                    content: content, // 得到修改之后的内容
+                    create_time: t_time(),
+                    tag_id: 1 
+                }
+                $.ajax({
+                    type: "post",
+                    url: "/blog",
+                    context: this,
+                    success:function(data, status){
+                        this.get_blogs();
+                        alert("插入成功!");
                         this.back();
                     }
                 })
